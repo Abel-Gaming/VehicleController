@@ -1,0 +1,35 @@
+body {
+    background: none !important;
+}
+
+#container {
+    font-size: 20px;
+    padding: 25px;
+    color: white;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgb(0, 0, 0);
+    height: 250px;
+    width: 500px;
+    border: 2px solid aliceblue;
+    border-radius: 7px;
+}
+
+button {
+	border: 5x;
+	border-color: white;
+	color: rgb(0, 0, 0);
+    padding: 10px;
+	font-size: 15px;
+	display: inline-block;
+	margin: 4px 4px;
+}
+
+input {
+    margin-bottom: 5px;
+    width: 100%;
+    font-size: 15px;
+    padding: 12px;
+}
