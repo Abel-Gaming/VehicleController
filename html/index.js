@@ -30,34 +30,10 @@ $(function () {
         $.post('http://VehicleController/exit', JSON.stringify({}));
         return
     })
-	
-	//when the user clicks on the lock button, it will run
-    $("#carmenu").click(function () {
-        $.post('http://VehicleController/carmenu');
-        return;
-    })
 
 	//when the user clicks on the lock button, it will run
     $("#lock").click(function () {
         $.post('http://VehicleController/togglelock');
-        return;
-    })
-	
-	//when the user clicks on the lock button, it will run
-    $("#givekeys").click(function () {
-        $.post('http://VehicleController/givekeys');
-        return;
-    })
-	
-	//when the user clicks on the hotwire button, it will run
-    $("#hotwire").click(function () {
-        $.post('http://VehicleController/hotwire');
-        return;
-    })
-	
-	//when the user clicks on the hotwire button, it will run
-    $("#searchcar").click(function () {
-        $.post('http://VehicleController/carsearch');
         return;
     })
 	

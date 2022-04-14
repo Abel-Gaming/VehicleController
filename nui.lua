@@ -1,7 +1,10 @@
 local display = false
 local lightsOn = false
+local doorsLocked = false
 local EngineAlwaysOn = false
+local vehicle = nil
 
+---------- COMMANDS ----------
 RegisterCommand("vehremote", function(source, args)
     SetDisplay(not display)
 end)
@@ -14,8 +17,11 @@ RegisterCommand("eao", function()
 	end
 end)
 
+---------- KEY MAPPINGS ----------
 RegisterKeyMapping('vehremote', 'Vehicle Remote', 'keyboard', '[')
 
+
+---------- ENGINE ON THREAD ----------
 Citizen.CreateThread(function()
 	while true do
 		Citizen.Wait(0)
@@ -27,33 +33,55 @@ Citizen.CreateThread(function()
 	end
 end)
 
+---------- LIGHTS ON THREAD ----------
+Citizen.CreateThread(function()
+	while true do
+		Citizen.Wait(0)
+		if lightsOn then
+			local playerPed = PlayerPedId()
+			local vehicle = GetVehiclePedIsIn(playerPed, true)
+			SetVehicleLightsMode(vehicle, 2)
+			SetVehicleLights(vehicle, 2)
+		else
+			local playerPed = PlayerPedId()
+			local vehicle = GetVehiclePedIsIn(playerPed, true)
+			SetVehicleLightsMode(vehicle, 0)
+			SetVehicleLights(vehicle, 0)
+		end
+	end
+end)
+
+---------- NO CONTROL IS DISPLAY IS OPEN ----------
+Citizen.CreateThread(function()
+    while display do
+        Citizen.Wait(0)
+        DisableControlAction(0, 1, display) -- LookLeftRight
+        DisableControlAction(0, 2, display) -- LookUpDown
+        DisableControlAction(0, 142, display) -- MeleeAttackAlternate
+        DisableControlAction(0, 18, display) -- Enter
+        DisableControlAction(0, 322, display) -- ESC
+        DisableControlAction(0, 106, display) -- VehicleMouseControlOverride
+    end
+end)
+
+---------- NUI CALLBACKS ----------
 RegisterNUICallback("exit", function(data)
     SetDisplay(false)
 end)
 
 RegisterNUICallback("togglelock", function(data)
-    ExecuteCommand("_carlock")
-	SetDisplay(false)
-end)
+    local playerPed = PlayerPedId()
+	local vehicle = GetVehiclePedIsIn(playerPed, true)
 
-RegisterNUICallback("hotwire", function(data)
-    ExecuteCommand("_hotwire")
-	SetDisplay(false)
-end)
-
-RegisterNUICallback("givekeys", function(data)
-    ExecuteCommand("_givekeys")
-	SetDisplay(false)
-end)
-
-RegisterNUICallback("carsearch", function(data)
-    ExecuteCommand("_carsearch")
-	SetDisplay(false)
-end)
-
-RegisterNUICallback("carmenu", function(data)
-    ExecuteCommand("_carmenu")
-	SetDisplay(false)
+	if doorsLocked then
+		TriggerServerEvent('VehicleController:UnlockVehicleServer', vehicle)
+		doorsLocked = false
+		SetDisplay(false)
+	else
+		TriggerServerEvent('VehicleController:LockVehicleServer', vehicle)
+		doorsLocked = true
+		SetDisplay(false)
+	end
 end)
 
 RegisterNUICallback("toggleengine", function(data)
@@ -74,6 +102,7 @@ RegisterNUICallback("headlights", function(data)
 	end
 end)
 
+---------- FUNCTIONS ----------
 function SetDisplay(bool)
     display = bool
     SetNuiFocus(bool, bool)
@@ -83,37 +112,19 @@ function SetDisplay(bool)
     })
 end
 
-Citizen.CreateThread(function()
-	while true do
-		Citizen.Wait(0)
-		if lightsOn then
-			local playerPed = PlayerPedId()
-			local vehicle = GetVehiclePedIsIn(playerPed, true)
-			SetVehicleLightsMode(vehicle, 2)
-			SetVehicleLights(vehicle, 2)
-		else
-			local playerPed = PlayerPedId()
-			local vehicle = GetVehiclePedIsIn(playerPed, true)
-			SetVehicleLightsMode(vehicle, 0)
-			SetVehicleLights(vehicle, 0)
-		end
-	end
-end)
-
-Citizen.CreateThread(function()
-    while display do
-        Citizen.Wait(0)
-        DisableControlAction(0, 1, display) -- LookLeftRight
-        DisableControlAction(0, 2, display) -- LookUpDown
-        DisableControlAction(0, 142, display) -- MeleeAttackAlternate
-        DisableControlAction(0, 18, display) -- Enter
-        DisableControlAction(0, 322, display) -- ESC
-        DisableControlAction(0, 106, display) -- VehicleMouseControlOverride
-    end
-end)
-
 function notify(string)
     SetNotificationTextEntry("STRING")
     AddTextComponentString(string)
     DrawNotification(true, false)
 end
+
+---------- EVENTS ----------
+RegisterNetEvent('VehicleController:LockVehicleClient')
+AddEventHandler('VehicleController:LockVehicleClient', function(vehicle)
+	SetVehicleDoorsLocked(vehicle, 2)
+end)
+
+RegisterNetEvent('VehicleController:UnlockVehicleClient')
+AddEventHandler('VehicleController:UnlockVehicleClient', function(vehicle)
+	SetVehicleDoorsLocked(vehicle, 1)
+end)
