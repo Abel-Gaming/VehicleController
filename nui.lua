@@ -1,13 +1,27 @@
 local display = false
 local lightsOn = false
 local doorsLocked = false
+local autoLock = false
 local EngineAlwaysOn = false
-local vehicle = nil
+local AutoLockvehicle
 
 ---------- COMMANDS ----------
 RegisterCommand("vehremote", function(source, args)
     SetDisplay(not display)
 end)
+
+RegisterCommand('dv', function()
+	local playerPed = PlayerPedId()
+	if IsPedInAnyVehicle(playerPed, false) then
+		local vehicle = GetVehiclePedIsIn(playerPed, false)
+		DeleteVehicle(vehicle)
+		notify('~g~[SUCCESS]~w~ Vehicle deleted!')
+	else
+		local vehicle = GetVehiclePedIsIn(playerPed, true)
+		DeleteVehicle(vehicle)
+		notify('~g~[SUCCESS]~w~ Vehicle deleted!')
+	end
+end, false)
 
 RegisterCommand("eao", function()
 	if EngineAlwaysOn then
@@ -64,6 +78,19 @@ Citizen.CreateThread(function()
     end
 end)
 
+Citizen.CreateThread(function()
+	while true do
+		Citizen.Wait(0)
+		if #(GetEntityCoords(PlayerPedId()) - GetEntityCoords(AutoLockvehicle)) >= 7.0 then
+			if not doorsLocked and autoLock then
+				notify('~y~[INFO]~w~ You vehicle doors have been locked')
+				doorsLocked = true
+				TriggerServerEvent('VehicleController:LockVehicleServer', AutoLockvehicle)
+			end
+		end
+	end
+end)
+
 ---------- NUI CALLBACKS ----------
 RegisterNUICallback("exit", function(data)
     SetDisplay(false)
@@ -75,18 +102,40 @@ RegisterNUICallback("togglelock", function(data)
 
 	if doorsLocked then
 		TriggerServerEvent('VehicleController:UnlockVehicleServer', vehicle)
+		notify('~g~[SUCCESS]~w~ Doors have been unlocked')
 		doorsLocked = false
 		SetDisplay(false)
 	else
 		TriggerServerEvent('VehicleController:LockVehicleServer', vehicle)
+		notify('~g~[SUCCESS]~w~ Doors have been locked')
 		doorsLocked = true
+		SetDisplay(false)
+	end
+end)
+
+RegisterNUICallback("toggleautolock", function(data)
+    local playerPed = PlayerPedId()
+
+	if IsPedInAnyVehicle(playerPed, false) then
+		if autoLock then
+			AutoLockvehicle = 0
+			autoLock = false
+			notify('~y~[INFO]~w~ Auto lock ~r~disabled')
+			SetDisplay(false)
+		else
+			AutoLockvehicle = GetVehiclePedIsIn(playerPed, false)
+			autoLock = true
+			notify('~y~[INFO]~w~ Auto lock ~g~enabled')
+			SetDisplay(false)
+		end
+	else
+		notify('~r~[ERROR]~w~ You are not in a vehicle')
 		SetDisplay(false)
 	end
 end)
 
 RegisterNUICallback("toggleengine", function(data)
     ExecuteCommand("eng")
-	notify('Engine Toggled')
 	SetDisplay(false)
 end)
 

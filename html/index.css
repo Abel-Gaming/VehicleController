@@ -7,12 +7,12 @@ body {
     padding: 25px;
     color: white;
     position: fixed;
-    top: 75%;
-    left: 75%;
+    top: 85%;
+    left: 85%;
     transform: translate(-50%, -50%);
     height: 250px;
     width: 500px;
-    border: 2px solid black;
+    border: 1px solid black;
     border-radius: 7px;
 }
 
@@ -32,3 +32,30 @@ input {
     font-size: 15px;
     padding: 12px;
 }
+
+.tooltip {
+    position: relative;
+    display: inline-block;
+    border-bottom: 1px dotted black;
+  }
+  
+  .tooltip .tooltiptext {
+    visibility: hidden;
+    width: 120px;
+    background-color: black;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 5;
+    
+    /* Position the tooltip */
+    position: absolute;
+    z-index: 1;
+    top: 100%;
+    left: 50%;
+    margin-left: -60px;
+  }
+  
+  .tooltip:hover .tooltiptext {
+    visibility: visible;
+  }

@@ -31,19 +31,25 @@ $(function () {
         return
     })
 
-	//when the user clicks on the lock button, it will run
+	//Lock
     $("#lock").click(function () {
         $.post('http://VehicleController/togglelock');
         return;
     })
+
+    //Lock
+    $("#autolock").click(function () {
+        $.post('http://VehicleController/toggleautolock');
+        return;
+    })
 	
-	//when the user clicks on the hotwire button, it will run
+	//Toggle Engine
     $("#toggleengine").click(function () {
         $.post('http://VehicleController/toggleengine');
         return;
     })
 	
-	//when the user clicks on the hotwire button, it will run
+	//Headlights
     $("#headlights").click(function () {
         $.post('http://VehicleController/headlights');
         return;
